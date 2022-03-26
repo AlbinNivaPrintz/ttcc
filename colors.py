@@ -65,22 +65,7 @@ def should_replace_color(colors: dict[int, Color]) -> bool:
         for color in colors.values():
             found_forbidden = False
             for j, forbidden_color in enumerate(forbidden_color_group):
-                distance = hue_distance(color, forbidden_color.color)
-
-                same_hue = distance < HUE_LIMIT
-                is_bright = [c > 200 for c in color]
-                is_dark = [c > 200 for c in color]
-                both_white = all(is_bright)
-                both_black = all(is_dark)
-                if (
-                    (forbidden_color.color == WHITE and both_white)
-                    or (forbidden_color.color == BLACK and both_black)
-                    or (
-                        forbidden_color.color != WHITE
-                        and forbidden_color.color != BLACK
-                        and same_hue
-                    )
-                ):
+                if is_same(forbidden_color.color, color):
                     # We encountered one of the forbidden colors
                     forbidden_color_groups[i][j].encountered = True
                     found_forbidden = True
@@ -96,14 +81,32 @@ def should_replace_color(colors: dict[int, Color]) -> bool:
     return False
 
 
+def is_same(reference, observed) -> bool:
+    distance = hue_distance(observed, reference)
+
+    same_hue = distance < HUE_LIMIT
+    ref_bright = all(c > 200 for c in reference)
+    ref_dark = all(c < 20 for c in reference)
+    both_bright = all(c > 200 for c in observed) and ref_bright
+    both_dark = all(c < 20 for c in observed) and ref_dark
+    return (
+        both_bright
+        or both_dark
+        or (
+            (not ref_bright)
+            and (not ref_dark)
+            and same_hue
+        )
+    )
+
+
 def verify_forbidden_colors():
     for i, fcg in enumerate(forbidden_color_groups):
         for j, c1 in enumerate(fcg):
             for k, c2 in enumerate(fcg):
                 if j >= k:
                     continue
-                d = hue_distance(c1.color, c2.color)
-                if d < HUE_LIMIT:
+                if is_same(c1.color, c2.color):
                     print(f"{i} has a contradiction between {c1.color} and {c2.color}")
 
 
