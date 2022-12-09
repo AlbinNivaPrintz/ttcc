@@ -12,17 +12,25 @@ YELLOW = (255, 255, 0)
 HUE_LIMIT = math.pi / 10
 
 forbidden_color_groups = [
+    # Russia
     [
-        EncounteredColor(color=RED, encountered=False),
         EncounteredColor(color=WHITE, encountered=False),
         EncounteredColor(color=BLUE, encountered=False),
+        EncounteredColor(color=RED, encountered=False),
     ],
+    # DIF
     [
+        EncounteredColor(color=YELLOW, encountered=False),
         EncounteredColor(color=RED, encountered=False),
         EncounteredColor(color=BLUE, encountered=False),
-        EncounteredColor(color=YELLOW, encountered=False),
     ],
 ]
+
+
+def reset_forbidden():
+    for i in range(len(forbidden_color_groups)):
+        for j in range(len(forbidden_color_groups[i])):
+            forbidden_color_groups[i][j].encountered = False
 
 
 def ukraine() -> dict[int, Color]:
@@ -59,25 +67,34 @@ def rainbow(order: int) -> dict[int, Color]:
     return colours
 
 
-def should_replace_color(colors: dict[int, Color]) -> bool:
-    for i, forbidden_color_group in enumerate(forbidden_color_groups):
-        found_not_forbidden = False
-        for color in colors.values():
-            found_forbidden = False
-            for j, forbidden_color in enumerate(forbidden_color_group):
-                if is_same(forbidden_color.color, color):
-                    # We encountered one of the forbidden colors
-                    forbidden_color_groups[i][j].encountered = True
-                    found_forbidden = True
-            if not found_forbidden:
-                # Not this particular forbidden
-                found_not_forbidden = True
+def matches_pattern(colors: dict[int, Color], forbidden_group: list[EncounteredColor]) -> bool:
+    """
+    Colors matches forbidden_group if every color is_same as one of the colors in forbidden_group,
+    and all colors in forbidden_group have been seen
+    """
+    for color in colors.values():
+        is_forbidden = False
+        for i, forbidden_color in enumerate(forbidden_group):
+            if is_same(forbidden_color.color, color):
+                # We encountered one of the forbidden colors
+                forbidden_group[i].encountered = True
+                is_forbidden = True
                 break
-        is_this_forbidden = all(
-            forbidden_color.encountered for forbidden_color in forbidden_color_groups[i]
-        ) and (not found_not_forbidden)
-        if is_this_forbidden:
+        if not is_forbidden:
+            # This color is not one of the forbidden ones, so does not match the pattern
+            return False
+    # If all was encountered, it's a match!
+    return all(x.encountered for x in forbidden_group)
+
+
+def should_replace_color(colors: dict[int, Color]) -> bool:
+    # For every forbidden color
+    for i, forbidden_color_group in enumerate(forbidden_color_groups):
+        if matches_pattern(colors, forbidden_color_group):
             return True
+
+    reset_forbidden()
+
     return False
 
 
@@ -108,6 +125,21 @@ def verify_forbidden_colors():
                     continue
                 if is_same(c1.color, c2.color):
                     print(f"{i} has a contradiction between {c1.color} and {c2.color}")
+
+    for g in forbidden_color_groups:
+        color = {i: c.color for i, c in enumerate(g)}
+        assert should_replace_color(color)
+        reset_forbidden()
+
+    # These colors should definitely pass
+    test_passing_colors = (
+            {0: BLACK},
+            )
+
+    for c in test_passing_colors:
+        assert not should_replace_color(c)
+        reset_forbidden()
+
 
 
 def hue_distance(a, b) -> float:
