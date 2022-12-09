@@ -1,6 +1,6 @@
 import os
 import requests as r
-from requests import HTTPAdapter
+from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 from typing import Optional
 import json

@@ -91,6 +91,7 @@ def should_replace_color(colors: dict[int, Color]) -> bool:
     # For every forbidden color
     for i, forbidden_color_group in enumerate(forbidden_color_groups):
         if matches_pattern(colors, forbidden_color_group):
+            reset_forbidden()
             return True
 
     reset_forbidden()
