@@ -1,5 +1,7 @@
 import os
 import requests as r
+from requests import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 from typing import Optional
 import json
 import time
@@ -33,14 +35,26 @@ OK_COLOR_WAIT = 30
 BASE_API_URL = os.environ["BASE_API_URL"]
 
 
+# Setup the global http session
+retry_strategy = Retry(
+        total=10,
+        backoff_factor=1
+        )
+adapter = HTTPAdapter(max_retries=retry_strategy)
+sess = r.Session()
+sess.mount("https://", adapter)
+sess.mount("http://", adapter)
+
+
+
 def get_colors() -> GetColorState:
-    res = r.get(BASE_API_URL + "getColours")
+    res = sess.get(BASE_API_URL + "getColours")
     s = GetColorState(**res.json())
     return s
 
 
 def request_lock() -> Optional[LockResponse]:
-    res = r.get(BASE_API_URL + "requestLock")
+    res = sess.get(BASE_API_URL + "requestLock")
     if res.status_code != 200:
         logging.error(f"failed to get request lock with text: {res.text}")
         return None
@@ -49,7 +63,7 @@ def request_lock() -> Optional[LockResponse]:
 
 def set_colors(hash: str, colors: dict[int, Color]):
     color_string = json.dumps(colors)
-    r.get(BASE_API_URL + "setColours", params={"hash": hash, "colours": color_string})
+    sess.get(BASE_API_URL + "setColours", params={"hash": hash, "colours": color_string})
 
 
 def main_loop():
