@@ -19,13 +19,13 @@ logging.basicConfig(
 )
 
 
-REQUEST_DELAY = 0.5
+REQUEST_DELAY = 1.0
 COLOR_DELAY = 2
 # If currently busy, wait this long
 # Should be shorter than one second to hopefully go faster than everyone else
-BUSY_INCALL_WAIT = 0.9
+BUSY_INCALL_WAIT = 1.0
 # If it's currently day, wait for this long
-DAY_WAIT = 120
+DAY_WAIT = 240
 # If we can change the color, but the color is ok, check again in this long
 OK_COLOR_WAIT = 30
 
