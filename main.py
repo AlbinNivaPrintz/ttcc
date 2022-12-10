@@ -49,7 +49,11 @@ sess.mount("http://", adapter)
 
 def get_colors() -> GetColorState:
     res = sess.get(BASE_API_URL + "getColours")
-    s = GetColorState(**res.json())
+    try:
+        s = GetColorState(**res.json())
+    except json.decoder.JSONDecodeError as e:
+        logging.error(f"failed to decode json body: {res.text}")
+        raise e
     return s
 
 
@@ -101,4 +105,7 @@ def main_loop():
 
 if __name__ == "__main__":
     while True:
-        main_loop()
+        try:
+            main_loop()
+        except Exception as e:
+            logging.warning(f"recieved error: {e}")
