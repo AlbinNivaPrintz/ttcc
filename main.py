@@ -11,6 +11,8 @@ from models import GetColorState, Color, LockResponse
 from colors import (
     rainbow,
     should_replace_color,
+    binary_message_generator,
+    moderator_message,
 )
 
 
@@ -96,8 +98,12 @@ def main_loop():
         time.sleep(REQUEST_DELAY)
         return
 
-    for i in range(150):
-        set_colors(lr.hash, rainbow(i))
+    # for i in range(150):
+    #     set_colors(lr.hash, rainbow(i))
+    #     time.sleep(COLOR_DELAY)
+    
+    for color in binary_message_generator(moderator_message):
+        set_colors(lr.hash, color)
         time.sleep(COLOR_DELAY)
 
     logging.info("finished setting colors")

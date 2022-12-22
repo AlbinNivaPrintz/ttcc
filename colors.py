@@ -26,6 +26,42 @@ forbidden_color_groups = [
     ],
 ]
 
+moderator_message = [
+    "01001001",
+    "00100000",
+    "01000001",
+    "01001101",
+    "00100000",
+    "01010100",
+    "01001000",
+    "01000101",
+    "00100000",
+    "01001101",
+    "01001111",
+    "01000100",
+    "01000101",
+    "01010010",
+    "01000001",
+    "01010100",
+    "01001111",
+    "01010010",
+    ]
+
+
+def binary_message_generator(message):
+    for msg in message:
+        yield binary_to_color(msg)
+
+
+def binary_to_color(bin: str) -> dict[int, Color]:
+    byte = {i: (WHITE if l == "1" else BLACK) for i, l in enumerate(bin)}
+    
+    # Just fill the remaining lamps with black
+    byte[8] = BLACK
+    byte[9] = BLACK
+
+    return byte
+
 
 def reset_forbidden():
     for i in range(len(forbidden_color_groups)):
