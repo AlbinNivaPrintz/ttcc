@@ -54,7 +54,7 @@ def binary_message_generator(message):
 
 
 def binary_to_color(bin: str) -> dict[int, Color]:
-    byte = {i: (WHITE if l == "1" else BLACK) for i, l in enumerate(bin)}
+    byte = {i: (WHITE if letter == "1" else BLACK) for i, letter in enumerate(bin)}
 
     # Just fill the remaining lamps with black
     byte[8] = BLACK

@@ -9,7 +9,6 @@ import logging
 
 from models import GetColorState, Color, LockResponse
 from colors import (
-    rainbow,
     should_replace_color,
     binary_message_generator,
     moderator_message,
