@@ -45,7 +45,7 @@ moderator_message = [
     "01010100",
     "01001111",
     "01010010",
-    ]
+]
 
 
 def binary_message_generator(message):
@@ -55,7 +55,7 @@ def binary_message_generator(message):
 
 def binary_to_color(bin: str) -> dict[int, Color]:
     byte = {i: (WHITE if l == "1" else BLACK) for i, l in enumerate(bin)}
-    
+
     # Just fill the remaining lamps with black
     byte[8] = BLACK
     byte[9] = BLACK
@@ -103,7 +103,9 @@ def rainbow(order: int) -> dict[int, Color]:
     return colours
 
 
-def matches_pattern(colors: dict[int, Color], forbidden_group: list[EncounteredColor]) -> bool:
+def matches_pattern(
+    colors: dict[int, Color], forbidden_group: list[EncounteredColor]
+) -> bool:
     """
     Colors matches forbidden_group if every color is_same as one of the colors in forbidden_group,
     and all colors in forbidden_group have been seen
@@ -144,13 +146,7 @@ def is_same(reference, observed) -> bool:
     both_bright = all(c > 200 for c in observed) and ref_bright
     both_dark = all(c < 20 for c in observed) and ref_dark
     return (
-        both_bright
-        or both_dark
-        or (
-            (not ref_bright)
-            and (not ref_dark)
-            and same_hue
-        )
+        both_bright or both_dark or ((not ref_bright) and (not ref_dark) and same_hue)
     )
 
 
@@ -169,14 +165,11 @@ def verify_forbidden_colors():
         reset_forbidden()
 
     # These colors should definitely pass
-    test_passing_colors = (
-            {0: BLACK},
-            )
+    test_passing_colors = ({0: BLACK},)
 
     for c in test_passing_colors:
         assert not should_replace_color(c)
         reset_forbidden()
-
 
 
 def hue_distance(a, b) -> float:

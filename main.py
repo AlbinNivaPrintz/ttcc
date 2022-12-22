@@ -38,15 +38,11 @@ BASE_API_URL = os.environ["BASE_API_URL"]
 
 
 # Setup the global http session
-retry_strategy = Retry(
-        total=10,
-        backoff_factor=1
-        )
+retry_strategy = Retry(total=10, backoff_factor=1)
 adapter = HTTPAdapter(max_retries=retry_strategy)
 sess = r.Session()
 sess.mount("https://", adapter)
 sess.mount("http://", adapter)
-
 
 
 def get_colors() -> GetColorState:
@@ -69,7 +65,9 @@ def request_lock() -> Optional[LockResponse]:
 
 def set_colors(hash: str, colors: dict[int, Color]):
     color_string = json.dumps(colors)
-    sess.get(BASE_API_URL + "setColours", params={"hash": hash, "colours": color_string})
+    sess.get(
+        BASE_API_URL + "setColours", params={"hash": hash, "colours": color_string}
+    )
 
 
 def main_loop():
@@ -101,7 +99,7 @@ def main_loop():
     # for i in range(150):
     #     set_colors(lr.hash, rainbow(i))
     #     time.sleep(COLOR_DELAY)
-    
+
     for color in binary_message_generator(moderator_message):
         set_colors(lr.hash, color)
         time.sleep(COLOR_DELAY)
