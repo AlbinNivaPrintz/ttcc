@@ -76,54 +76,53 @@ def main_loop():
     waitingForBusy = False
 
     while True:
-        get_colors_state = get_colors()
+        try:
+            get_colors_state = get_colors()
 
-        if get_colors_state.isDay:
-            logging.debug(f"is day: waiting for {DAY_WAIT}")
-            time.sleep(DAY_WAIT)
-            continue
+            if get_colors_state.isDay:
+                logging.debug(f"is day: waiting for {DAY_WAIT}")
+                time.sleep(DAY_WAIT)
+                continue
 
-        if get_colors_state.isBusy or get_colors_state.inCall:
-            logging.debug(f"is buisy: waiting for {BUSY_INCALL_WAIT}")
-            waitingForBusy = True
-            time.sleep(BUSY_INCALL_WAIT)
-            continue
+            if get_colors_state.isBusy or get_colors_state.inCall:
+                logging.debug(f"is buisy: waiting for {BUSY_INCALL_WAIT}")
+                waitingForBusy = True
+                time.sleep(BUSY_INCALL_WAIT)
+                continue
 
-        should_replace = should_replace_color(get_colors_state.colours)
+            should_replace = should_replace_color(get_colors_state.colours)
 
-        if waitingForBusy:
-            logging.debug("storing shit")
-            db.store_color(get_colors_state.colours, should_replace)
+            if waitingForBusy:
+                logging.debug("storing shit")
+                db.store_color(get_colors_state.colours, should_replace)
 
-        # See if the current color is one that we want to change
-        if not should_replace:
-            logging.debug(f"is free with ok-color: waiting for {OK_COLOR_WAIT}")
-            time.sleep(OK_COLOR_WAIT)
-            continue
+            # See if the current color is one that we want to change
+            if not should_replace:
+                logging.debug(f"is free with ok-color: waiting for {OK_COLOR_WAIT}")
+                time.sleep(OK_COLOR_WAIT)
+                continue
 
-        logging.info(f"replacing color {get_colors_state.colours}")
+            logging.info(f"replacing color {get_colors_state.colours}")
 
-        lr = request_lock()
-        if lr is None:
-            time.sleep(REQUEST_DELAY)
-            continue
+            lr = request_lock()
+            if lr is None:
+                time.sleep(REQUEST_DELAY)
+                continue
 
-        # for i in range(150):
-        #     set_colors(lr.hash, rainbow(i))
-        #     time.sleep(COLOR_DELAY)
+            # for i in range(150):
+            #     set_colors(lr.hash, rainbow(i))
+            #     time.sleep(COLOR_DELAY)
 
-        for color in binary_message_generator(moderator_message):
-            set_colors(lr.hash, color)
-            time.sleep(COLOR_DELAY)
+            for color in binary_message_generator(moderator_message):
+                set_colors(lr.hash, color)
+                time.sleep(COLOR_DELAY)
 
-        logging.info("finished setting colors")
+            logging.info("finished setting colors")
+        except Exception as e:
+            logging.warning(f"recieved error: {e}")
 
 
 if __name__ == "__main__":
     db.init()
 
-    while True:
-        try:
-            main_loop()
-        except Exception as e:
-            logging.warning(f"recieved error: {e}")
+    main_loop()

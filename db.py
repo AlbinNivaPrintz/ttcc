@@ -3,7 +3,7 @@ import datetime
 
 from models import Color
 
-con = sqlite3.connect("colours.db")
+con = sqlite3.connect("colours.db", detect_types=sqlite3.PARSE_DECLTYPES)
 
 cur = con.cursor()
 
@@ -49,7 +49,7 @@ def init():
     )
 
 
-def color_to_db_format(colors: dict[int, Color]) -> list[int]:
+def colors_to_db_format(colors: dict[int, Color]) -> list[int]:
     data = []
 
     for i in range(10):
@@ -62,7 +62,7 @@ def color_to_db_format(colors: dict[int, Color]) -> list[int]:
 
 
 def store_color(color: dict[int, Color], was_replaced: bool):
-    db_encoded_color = color_to_db_format(color)
+    db_encoded_color = colors_to_db_format(color)
 
     data = (
         datetime.datetime.now(datetime.timezone.utc),
@@ -77,3 +77,38 @@ def store_color(color: dict[int, Color], was_replaced: bool):
         data,
     )
     con.commit()
+
+
+def get_colors(n_rows: int):
+    res = cur.execute(
+        """
+        SELECT * FROM Colors limit ?;
+        """,
+        (n_rows,),
+    )
+
+    structured_data: list[
+        tuple[
+            datetime.datetime,
+            bool,
+            Color,
+            Color,
+            Color,
+            Color,
+            Color,
+            Color,
+            Color,
+            Color,
+            Color,
+            Color,
+        ]
+    ] = []
+    data = res.fetchall()
+    for row in data:
+        structured_row = (
+            row[0],
+            bool(row[1]),
+            *[(row[i], row[i + 1], row[i + 2]) for i in range(2, 32, 3)],
+        )
+        structured_data.append(structured_row)
+    return structured_data
